@@ -26,7 +26,7 @@ DIRECTIONS = [
 def output(board)
   puts "  #{ROW.join(' ')}"
   board.each.with_index do |row, i|
-    print COL[i].to_s
+    print COL[i]
     row.each do |cell|
       case cell
       when WHITE_STONE then print ' ○'
@@ -53,7 +53,7 @@ def put_stone!(board, cellstr, stone_color, execute = true) # rubocop:disable St
 
   # コピーした盤面にて石の配置を試みて、成功すれば反映する
   copied_board = Marshal.load(Marshal.dump(board))
-  copied_board[pos.row][pos.col] = stone_color
+  copied_board[pos.col][pos.row] = stone_color
 
   turn_succeed = false
   DIRECTIONS.each do |direction|
@@ -61,17 +61,22 @@ def put_stone!(board, cellstr, stone_color, execute = true) # rubocop:disable St
     turn_succeed = true if turn!(copied_board, next_pos, stone_color, direction)
   end
 
+  # boardの石を反転させる
   copy_board(board, copied_board) if execute && turn_succeed
 
   turn_succeed
 end
 
-# target_posはひっくり返す対象セル
 def turn!(board, target_pos, attack_stone_color, direction)
+  # ボード外のため、NG
   return false if target_pos.out_of_board?
+  # 空はひっくり返せないので、NG
+  return false if board[target_pos.col][target_pos.row] == BLANK_CELL
+  # 同じ色はひっくり返せないので、NG
   return false if target_pos.stone_color(board) == attack_stone_color
 
   next_pos = target_pos.next_position(direction)
+  # 次の位置に同色がくるまで再帰的にチェックする
   if (next_pos.stone_color(board) == attack_stone_color) || turn!(board, next_pos, attack_stone_color, direction)
     board[target_pos.col][target_pos.row] = attack_stone_color
     true
@@ -80,19 +85,22 @@ def turn!(board, target_pos, attack_stone_color, direction)
   end
 end
 
+# ゲームが終了したかの判定
 def finished?(board)
   !placeable?(board, WHITE_STONE) && !placeable?(board, BLACK_STONE)
 end
 
+# 黒と白の新しい石を置ける場所があるか判定
 def placeable?(board, attack_stone_color)
   board.each.with_index do |cols, col|
     cols.each.with_index do |cell, row|
       next unless cell == BLANK_CELL # 空セルでなければ判定skip
 
       position = Position.new(row:, col:)
-      return true if put_stone!(board, position.to_cellstr, attack_stone_color, false)
+      return true if put_stone!(board, position.to_cellstr, attack_stone_color)
     end
   end
+  false
 end
 
 def count_stone(board, stone_color)

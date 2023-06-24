@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 require_relative './lib/reversi_methods'
@@ -7,6 +8,7 @@ QUIT_COMMANDS = %w[quit exit q].freeze
 
 # @boardは盤面を示す二次元配列
 @board = Array.new(8) { Array.new(8, BLANK_CELL) }
+# 初期値を設定
 @board[3][3] = WHITE_STONE # d5
 @board[4][4] = WHITE_STONE # e4
 @board[3][4] = BLACK_STONE # d4
