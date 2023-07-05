@@ -90,7 +90,7 @@ def placeable?(board, attack_stone_color)
       next unless cell == BLANK_CELL # 空セルでなければ判定skip
 
       position = Position.new(row:, col:)
-      return true if put_stone!(board, position.to_cellstr, attack_stone_color)
+      return true if put_stone!(board, position.to_cellstr, attack_stone_color, false)
     end
   end
   false
